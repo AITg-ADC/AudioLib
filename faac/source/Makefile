@@ -18,7 +18,7 @@ check_exist = if [ ! -e ./.nvt_finish ]; \
               tar -zxf $(1).tar.gz; \
               fi
 
-all:
+all: init
 	@echo Creating library $(MODULE_NAME) ...
 	@if [ ! -f ./.nvt_finish ]; then \
 	$(call check_exist, ${FAAC}); \
@@ -37,3 +37,11 @@ install:
 	@mkdir -p $(LIB_INC_PATH)
 	@cp -avf $(INSTALL_DIR)/lib/*.so* $(INSTALL_DIR)/lib/*.a $(OUTPUT_DIR)
 	@cp -avf $(INSTALL_DIR)/include/* $(LIB_INC_PATH)
+
+init:
+	@if [ ! -e "${INSTALL_DIR}" ]; then \
+		mkdir -p ${INSTALL_DIR}; \
+	fi
+	@if [ -z "${CROSS_COMPILE}" ]; then \
+		echo "Please execute \"source build/envsetup.sh\" firstly.  Stop."; exit 1; \
+	fi
