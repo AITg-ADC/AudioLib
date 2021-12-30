@@ -12,7 +12,7 @@ INSTALL_DIR := $(shell pwd)/output
 
 FAAC := faac-1_30
 
-check_exist = if [ ! -e ./.nvt_finish ]; \
+check_exist = if [ ! -e ./.finish ]; \
               then rm -rf $(1); \
               curl -s -L -o faac-1_30.tar.gz https://github.com/knik0/faac/archive/refs/tags/1_30.tar.gz; \
               tar -zxf $(1).tar.gz; \
@@ -20,13 +20,13 @@ check_exist = if [ ! -e ./.nvt_finish ]; \
 
 all: init
 	@echo Creating library $(MODULE_NAME) ...
-	@if [ ! -f ./.nvt_finish ]; then \
+	@if [ ! -f ./.finish ]; then \
 	$(call check_exist, ${FAAC}); \
 	cd ${FAAC}; ./bootstrap; ./configure --prefix=${INSTALL_DIR} CC=${CC} CXX=${CXX} AR=${AR} --host=${NVT_HOST} --target=${NVT_HOST}; make -j$(MULTI_CORES); \
 	cd -; \
 	fi
 	@cd ${FAAC}; make install; cd -;
-	@touch ./.nvt_finish
+	@touch ./.finish
 
 clean:
 	@make -C ${FAAC} clean
