@@ -1,0 +1,2 @@
+1. "make" to generate lib files
+2. "make install" to copy files to specified folder
