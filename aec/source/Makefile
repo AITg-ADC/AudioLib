@@ -119,5 +119,4 @@ install:
 	@mkdir -p $(OUTPUT_DIR)
 	@mkdir -p $(LIB_INC_PATH)
 	@cp -avf $(LIB_NAME) $(OUTPUT_DIR)
-	@cp -avf ../include/* $(LIB_INC_PATH)
 endif
