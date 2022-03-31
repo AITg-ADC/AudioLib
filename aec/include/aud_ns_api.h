@@ -22,7 +22,8 @@ typedef enum _EN_AUD_NS_PARAMS
 {
     EN_AUD_NS_BANK_SCALE,               //Band scale method, 1: linear scale  0: bark scale (default=1 (linear))
     EN_AUD_NS_NOISE_SUPPRESS,           //Noise suppression level (defualt=-15)
-    EN_AUD_NS_PARAMS_TOTAL
+    EN_AUD_NS_DENOISE,
+    EN_AUD_NS_PARAMS_TOTAL    
 } EN_AUD_NS_PARAMS;
 
 typedef enum _EN_AUD_NS_ERR

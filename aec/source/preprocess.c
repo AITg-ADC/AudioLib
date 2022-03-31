@@ -2720,6 +2720,11 @@ u32 _Aec_SetPreProcParams(void **ppstPreProcState, EN_AUD_AEC_PARAMS enParamsCMD
                 ppstPreProcSt[i]->echo_noise_ratio = s16value;
             break;
         }
+        case EN_AUD_AEC_DENOISE: {
+            for (i = 0; i < pstEchoSt->C; i++)
+                ppstPreProcSt[i]->denoise_enabled = s32value;
+            break;
+        }
 #ifdef ADD_NLP
         case EN_AUD_AEC_NLP_ENABLE: {
             if ((pstEchoSt->C == 1) && (pstEchoSt->K == 1) && (pstEchoSt->sampling_rate == 8000))
@@ -2879,6 +2884,11 @@ u32 _Ns_SetPreProcParams(void **ppstPreProcState, EN_AUD_NS_PARAMS enParamsCMD, 
         case EN_AUD_NS_NOISE_SUPPRESS: {
             for (i = 0; i < s32ChannelNum; i++)
                 ppstPreProcSt[i]->noise_suppress = s32value;
+            break;
+        }
+        case EN_AUD_NS_DENOISE: {
+            for (i = 0; i < s32ChannelNum; i++)
+                ppstPreProcSt[i]->denoise_enabled = s32value;
             break;
         }
         default:

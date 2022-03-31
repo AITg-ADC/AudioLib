@@ -57,7 +57,7 @@
 #include "os_support.h"
 
 #define NB_BANDS 24
-//#define USE_THOSE_PARAMS
+#define USE_THOSE_PARAMS
 
 
 #ifdef __cplusplus

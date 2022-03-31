@@ -49,6 +49,7 @@ typedef enum _EN_AUD_AEC_PARAMS
     /*Noise Suppression*/
     EN_AUD_AEC_BANK_SCALE,              //Band scale method, 1: linear scale  0: bark scale (default=1 (linear))
     EN_AUD_AEC_NOISE_SUPPRESS,          //Noise suppression level (defualt=-15)
+    EN_AUD_AEC_DENOISE,                 //Denoise enable
     EN_AUD_AEC_ECHO_SUPPRESS,           //Echo suppression level (defualt=-40)
     EN_AUD_AEC_ECHO_SUPPRESS_ACTIVE,    //Echo suppression level (defualt=-15)
     EN_AUD_AEC_ECHO_NOISE_RATIO,        //Means the proportion of depending on the old echo infornmation. (default=0.8)

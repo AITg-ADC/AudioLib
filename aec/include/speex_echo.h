@@ -75,7 +75,7 @@ extern "C" {
 
 #define PLAYBACK_DELAY 2
 
-//#define USE_THOSE_PARAMS
+// #define USE_THOSE_PARAMS
 
 /** Internal echo canceller state. Should never be accessed directly. */
 struct SpeexEchoState_;

@@ -48,7 +48,7 @@ static int _u32SampleCount;
 // static void _dynamicParamsTest(void);
 
 int main_AEC(void);
-int main_NS(void);
+int main_NS(int);
 
 AUD_TEST_PERF_DEFINE_VARIABLES
 
@@ -66,8 +66,32 @@ int main(int argc, char **argv)
 #if defined(__GNUC__) && defined(__arm__)
     total_time = 0;
 #endif
-    main_AEC();
-    main_NS();
+    int key;
+
+    // query user key
+    printf("Enter e for echo test, d for denoise , n for noise subpress and q to exit\n");
+    while (1)
+    {
+        key = getchar();
+        if (key == 'q' || key == 0x3)
+        {
+            break;
+        }
+        if (key == 'e')
+        {
+            main_AEC();
+            break;
+        }
+        if (key == 'd') {
+            main_NS(1);
+            break;
+        }
+        if (key == 'n')
+        {
+            main_NS(0);
+            break;
+        }
+    }
 
     return 0;
 }
@@ -76,7 +100,7 @@ int main_AEC(void)
 {
     FILE *echo_fd, *ref_fd, *e_fd;
     FILE *FilterW_fd, *FilterR_fd;
-    short echo_buf[NUM_SPEAKER * NN * 2], ref_buf[NUM_MIC * NN];  //, e_buf[NUM_MIC*NN];
+    short echo_buf[NUM_SPEAKER * NN * 2], ref_buf[NUM_MIC * NN]; //, e_buf[NUM_MIC*NN];
     short *e_buf = ref_buf;
     int speakerSize = NUM_SPEAKER * NN;
     int micSize = NUM_MIC * NN;
@@ -104,19 +128,23 @@ int main_AEC(void)
     _u32FrameCount = 0;
 
     // Open file
-    if ((echo_fd = fopen(speaker_pcm, "rb")) == NULL) {
+    if ((echo_fd = fopen(speaker_pcm, "rb")) == NULL)
+    {
         printf("Open %s failed\n", speaker_pcm);
         return 0;
     }
-    if ((ref_fd = fopen(mic_pcm, "rb")) == NULL) {
+    if ((ref_fd = fopen(mic_pcm, "rb")) == NULL)
+    {
         printf("Open %s failed\n", mic_pcm);
         return 0;
     }
-    if ((e_fd = fopen(out_pcm, "wb")) == NULL) {
+    if ((e_fd = fopen(out_pcm, "wb")) == NULL)
+    {
         printf("Open %s failed\n", out_pcm);
         return 0;
     }
-    if ((FilterW_fd = fopen(FilterW_bin, "wb")) == NULL) {
+    if ((FilterW_fd = fopen(FilterW_bin, "wb")) == NULL)
+    {
         printf("Open %s failed\n", FilterW_bin);
         return 0;
     }
@@ -135,9 +163,11 @@ int main_AEC(void)
     pInternalBuf = malloc(stAecRtn.u32InternalBufSize);
 
     stAecPreload.u32PreloadEnable = 0;
-    if (stAecPreload.u32PreloadEnable) {
+    if (stAecPreload.u32PreloadEnable)
+    {
         char FilterR_bin[64] = "preload_r.bin";
-        if ((FilterR_fd = fopen(FilterR_bin, "rb")) == NULL) {
+        if ((FilterR_fd = fopen(FilterR_bin, "rb")) == NULL)
+        {
             printf("Open %s failed\n", FilterR_bin);
             return 0;
         }
@@ -155,41 +185,42 @@ int main_AEC(void)
     AUD_AEC_Init(pInternalBuf, stAecRtn.u32InternalBufSize, &stAecPreload);
 
     memset(e_buf, 0, micSize);
-    ps32Params[0] = 1;  // 0:disable 1:enable   	//default=1
+    ps32Params[0] = 1; // 0:disable 1:enable   	//default=1
     AUD_AEC_SetParam(EN_AUD_AEC_ENABLE_AR, (void *)ps32Params);
-    ps32Params[0] = 1;  //  for 1st channel	//1 or 2	//default = 1
-    ps32Params[1] = 1;  //  for 2nd channel
+    ps32Params[0] = 1; //  for 1st channel	//1 or 2	//default = 1
+    ps32Params[1] = 1; //  for 2nd channel
     AUD_AEC_SetParam(EN_AUD_AEC_AMP_RATE, (void *)ps32Params);
-    ps32Params[0] = (int)AEC_QCONST16(.9, 15);  // 0.75~0.9	//default=0.9
+    ps32Params[0] = (int)AEC_QCONST16(.9, 15); // 0.75~0.9	//default=0.9
     AUD_AEC_SetParam(EN_AUD_AEC_PREEMPH, (void *)ps32Params);
-    ps32Params[0] = (int)AEC_QCONST16(.992, 15);  // 0.9~0.992	//default=0.992
+    ps32Params[0] = (int)AEC_QCONST16(.992, 15); // 0.9~0.992	//default=0.992
     AUD_AEC_SetParam(EN_AUD_AEC_NOTCH_RADIUS, (void *)ps32Params);
-    ps32Params[0] = (int)AEC_QCONST16(0.99, 15);  // 0.1~0.5		//default=0.25
+    ps32Params[0] = (int)AEC_QCONST16(0.99, 15); // 0.1~0.5		//default=0.25
     AUD_AEC_SetParam(EN_AUD_AEC_LEAK_ESTIMATE, (void *)ps32Params);
-    ps32Params[0] = 1;  // 1:disable 0:enable   	//default=0
+    ps32Params[0] = 1; // 1:disable 0:enable   	//default=0
     AUD_AEC_SetParam(EN_AUD_AEC_DISABLE_LEAK_ESTIMTAE, (void *)ps32Params);
-    ps32Params[0] = 0;  // 1:disable 0:enable   	//default=0
+    ps32Params[0] = 0; // 1:disable 0:enable   	//default=0
     AUD_AEC_SetParam(EN_AUD_AEC_DISABLE_DC_FILTER, (void *)ps32Params);
-    ps32Params[0] = 0;  // 1:disable 0:enable   	//default=0
+    ps32Params[0] = 0; // 1:disable 0:enable   	//default=0
     AUD_AEC_SetParam(EN_AUD_AEC_DISABLE_ECHO_SMOOTH, (void *)ps32Params);
 
-    ps32Params[0] = 0;  // default = 1 (linear)
+    ps32Params[0] = 0; // default = 1 (linear)
     AUD_AEC_SetParam(EN_AUD_AEC_BANK_SCALE, (void *)ps32Params);
-    ps32Params[0] = -20;  // default = -15dB
+    ps32Params[0] = -20; // default = -15dB
     AUD_AEC_SetParam(EN_AUD_AEC_NOISE_SUPPRESS, (void *)ps32Params);
-    ps32Params[0] = -50;  // default = -40dB
+    ps32Params[0] = -50; // default = -40dB
     AUD_AEC_SetParam(EN_AUD_AEC_ECHO_SUPPRESS, (void *)ps32Params);
-    ps32Params[0] = -50;  // default = -15dB
+    ps32Params[0] = -50; // default = -15dB
     AUD_AEC_SetParam(EN_AUD_AEC_ECHO_SUPPRESS_ACTIVE, (void *)ps32Params);
-    ps32Params[0] = (int)AEC_QCONST16(0.8f, 15);  // 0.6~0.8		//default=0.8
+    ps32Params[0] = (int)AEC_QCONST16(0.8f, 15); // 0.6~0.8		//default=0.8
     AUD_AEC_SetParam(EN_AUD_AEC_ECHO_NOISE_RATIO, (void *)ps32Params);
-    ps32Params[0] = 1;  // 0:disable 1:enable  //default=1
+    ps32Params[0] = 1; // 0:disable 1:enable  //default=1
     AUD_AEC_SetParam(EN_AUD_AEC_NLP_ENABLE, (void *)ps32Params);
 
     if (stAecInfoPre.u32SpkrMixIn)
         speakerSize <<= 1;
 
-    while (!feof(ref_fd) && !feof(echo_fd)) {
+    while (!feof(ref_fd) && !feof(echo_fd))
+    {
         _u32FrameCount++;
 
         fread(ref_buf, sizeof(short), micSize, ref_fd);
@@ -203,7 +234,7 @@ int main_AEC(void)
         //_dynamicParamsTest();
 #ifdef _ARMV7_
         // gettimeofday (&tv_start, &tz);      //start time evaluation
-        gettimeofday(&tv_start, NULL);  // start time evaluation
+        gettimeofday(&tv_start, NULL); // start time evaluation
 #endif
 
         /* Run */
@@ -211,7 +242,7 @@ int main_AEC(void)
 
 #ifdef _ARMV7_
         // gettimeofday (&tv_end, &tz);        //end of time evaluation
-        gettimeofday(&tv_end, NULL);  // end of time evaluation
+        gettimeofday(&tv_end, NULL); // end of time evaluation
         total_time = total_time + (tv_end.tv_sec - tv_start.tv_sec) + (tv_end.tv_usec - tv_start.tv_usec) * 0.000001;
 #endif
 
@@ -223,7 +254,8 @@ int main_AEC(void)
 
         printf("[frames]%d\r", _u32FrameCount);
 
-        if (s32RealCount == 500) {
+        if (s32RealCount == 500)
+        {
             AUD_TEST_PERF_RESULT(SAMPLING_RATE, NN * s32RealCount);
             AUD_TEST_PERF_RESET_COUNTER;
             s32RealCount = 0;
@@ -252,20 +284,22 @@ int main_AEC(void)
     return 0;
 }
 
-int main_NS(void)
+int main_NS(int useDenoise)
 {
     FILE *in_fd, *out_fd;
     short in_buf[CH * NN];
     short extra_buf[CH * NN];
-    short *out_buf = extra_buf;  // in_buf;
+    short *out_buf = extra_buf; // in_buf;
     int Size = CH * NN;
+    
 #if SAMPLING_RATE == 8000
 #if CH == 2
     char in_pcm[32] = "output2_8k.pcm";
     char out_pcm[32] = "ns_out_8k.pcm";
 #else
     char in_pcm[32] = "aec_mic.pcm";
-    char out_pcm[32] = "ns_output.pcm";
+    char out_pcm[32];
+    sprintf(out_pcm, "%s", (useDenoise ==1) ? "dn_output.pcm" : "ns_output.pcm");
 #endif
 #else
     char in_pcm[32] = "output_test.pcm";
@@ -283,11 +317,13 @@ int main_NS(void)
     memset(extra_buf, 0, Size * sizeof(short));
 
     // Open file
-    if ((in_fd = fopen(in_pcm, "rb")) == NULL) {
+    if ((in_fd = fopen(in_pcm, "rb")) == NULL)
+    {
         printf("Open %s failed\n", in_pcm);
         return 0;
     }
-    if ((out_fd = fopen(out_pcm, "wb")) == NULL) {
+    if ((out_fd = fopen(out_pcm, "wb")) == NULL)
+    {
         printf("Open %s failed\n", out_pcm);
         return 0;
     }
@@ -302,12 +338,18 @@ int main_NS(void)
 
     AUD_NS_Init(pInternalBuf, stNsRtn.u32InternalBufSize);
 
-    ps32Params[0] = 0;  // default = 1 (linear)
-    AUD_NS_SetParam(EN_AUD_NS_BANK_SCALE, (void *)ps32Params);
-    ps32Params[0] = -40;  // default = -40dB
-    AUD_NS_SetParam(EN_AUD_NS_NOISE_SUPPRESS, (void *)ps32Params);
+    if (useDenoise == 1) {
+        ps32Params[0] = 1;
+        AUD_NS_SetParam(EN_AUD_NS_DENOISE, (void *)ps32Params);
+    } else {
+        ps32Params[0] = 0;  // default = 1 (linear)
+        AUD_NS_SetParam(EN_AUD_NS_BANK_SCALE, (void *)ps32Params);
+        ps32Params[0] = -40;  // default = -40dB
+        AUD_NS_SetParam(EN_AUD_NS_NOISE_SUPPRESS, (void *)ps32Params);
+    }
 
-    while (!feof(in_fd) && !feof(out_fd)) {
+    while (!feof(in_fd) && !feof(out_fd))
+    {
         _u32FrameCount++;
 
         fread(in_buf, sizeof(short), Size, in_fd);
@@ -319,13 +361,13 @@ int main_NS(void)
         //_dynamicParamsTest();
 #ifdef _ARMV7_
         // gettimeofday (&tv_start, &tz);      //start time evaluation
-        gettimeofday(&tv_start, NULL);  // start time evaluation
+        gettimeofday(&tv_start, NULL); // start time evaluation
 #endif
         /* Run */
         AUD_NS_Run(in_buf, out_buf);
 #ifdef _ARMV7_
         // gettimeofday (&tv_end, &tz);        //end of time evaluation
-        gettimeofday(&tv_end, NULL);  // end of time evaluation
+        gettimeofday(&tv_end, NULL); // end of time evaluation
         total_time = total_time + (tv_end.tv_sec - tv_start.tv_sec) + (tv_end.tv_usec - tv_start.tv_usec) * 0.000001;
 #endif
 

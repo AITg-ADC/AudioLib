@@ -81,7 +81,6 @@ install:
 	@mkdir -p $(OUTPUT_DIR)
 	@mkdir -p $(LIB_INC_PATH)
 	@cp -af *.so* *.a $(OUTPUT_DIR)
-	@cp -af ../include/* $(LIB_INC_PATH)
 ifneq ("$(wildcard prebuild/$(ENV_LIBC)/*.a)","")
 	@cp -avf prebuild/$(ENV_LIBC)/*.* $(OUTPUT_DIR)
 endif
