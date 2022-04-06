@@ -93,7 +93,7 @@ EN_AUD_NS_ERR _AUD_NS_Init(void *pInternalBuf, int u32BufSize)
         return EN_AUD_NS_EINITFAIL;
     
     AUD_Malloc_Init(pInternalBuf, u32BufSize);
-    _ppstPreProcState = AUD_calloc(u32ChannelNum,sizeof(void *));
+    _ppstPreProcState = (void**)AUD_calloc(u32ChannelNum,sizeof(void *));
 
     set_kiss_fft_stride(u32FrameSize);
 

@@ -102,10 +102,10 @@ EN_AUD_AEC_ERR _AUD_AEC_Init(void *pInternalBuf, int u32BufSize, PST_AUD_AEC_PRE
         return EN_AUD_AEC_EINITFAIL;
 
     AUD_Malloc_Init(pInternalBuf, u32BufSize);
-    _ppstPreProcState = AUD_calloc(u32NumMic, sizeof(void *));
-    _ps16AecOutBuf = AUD_calloc((u32NumMic * u32FrameSize), sizeof(s16));
+    _ppstPreProcState = (void**)AUD_calloc(u32NumMic, sizeof(void *));
+    _ps16AecOutBuf = (s16*)AUD_calloc((u32NumMic * u32FrameSize), sizeof(s16));
 
-    _ppstEchoState = AUD_calloc(u32NumMic, sizeof(void *));
+    _ppstEchoState = (void**)AUD_calloc(u32NumMic, sizeof(void *));
     set_kiss_fft_stride(u32FrameSize);
     if (_stAecInfo.u32SpkrDualMono) {
         for (i = 0; i < u32NumMic; i++) {

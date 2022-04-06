@@ -36,11 +36,17 @@ DEFINE_FLAGS += -DADD_NLP
 
 #--------- ENVIRONMENT SETTING --------------------
 WARNING	= -Wall -Wundef -Wsign-compare -Wno-missing-braces -Wstrict-prototypes -Wno-sign-compare
-COMPILE_OPTS	= -I. -O2 -fPIC -ffunction-sections -fdata-sections -D__LINUX_USER__
+ifeq ($(findstring NA51089,$(PLATFORM_CFLAGS)), NA51089)
+OPTIMIZATION = -O1
+else
+OPTIMIZATION = -O2
+endif
+
+COMPILE_OPTS	= -I. $(OPTIMIZATION) -fPIC -ffunction-sections -fdata-sections -D__LINUX_USER__
 C_CFLAGS	= $(PLATFORM_CFLAGS) $(COMPILE_OPTS) $(WARNING) $(EXTRA_INCLUDE)
 C_CFLAGS += $(OPTFLAG) 
 C_CFLAGS += $(DEFINE_FLAGS)
-LD_FLAGS	= -fPIC -shared -lpthread
+LD_FLAGS	= -fPIC -shared -lpthread -lm
 
 #--------- END OF ENVIRONMENT SETTING -------------
 SRC = \

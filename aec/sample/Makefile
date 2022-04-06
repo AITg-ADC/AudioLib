@@ -13,7 +13,7 @@ EXTRA_INCLUDE += -I$(LIBRARY_INC_PATH) -I$(LIBFDT_INC_PATH)
 ###############################################################################
 ifeq ($(NVT_PRJCFG_CFG),Linux)
 #--------- ENVIRONMENT SETTING --------------------
-WARNING		= -Wall -Wundef -Wsign-compare -Wno-missing-braces -Wstrict-prototypes -Werror
+WARNING		= -Wall -Wundef -Wsign-compare -Wno-missing-braces -Werror
 COMPILE_OPTS	=  -I. -O2 -fPIC -ffunction-sections -fdata-sections -D__LINUX
 C_CFLAGS	= $(PLATFORM_CFLAGS) $(COMPILE_OPTS) $(WARNING) $(EXTRA_INCLUDE)
 #C_CFLAGS += -march=armv7-a -DARMV7 -mfloat-abi=hard

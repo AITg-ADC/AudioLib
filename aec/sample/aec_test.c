@@ -172,10 +172,10 @@ int main_AEC(void)
             return 0;
         }
         fread(&stAecPreload.u32ForegroundSize, sizeof(u32), 1, FilterR_fd);
-        stAecPreload.ps16Foreground = malloc(stAecPreload.u32ForegroundSize);
+        stAecPreload.ps16Foreground = (short*) malloc(stAecPreload.u32ForegroundSize);
         fread(stAecPreload.ps16Foreground, 1, stAecPreload.u32ForegroundSize, FilterR_fd);
         fread(&stAecPreload.u32BackgroundSize, sizeof(u32), 1, FilterR_fd);
-        stAecPreload.ps32Background = malloc(stAecPreload.u32BackgroundSize);
+        stAecPreload.ps32Background = (int*) malloc(stAecPreload.u32BackgroundSize);
         fread(stAecPreload.ps32Background, 1, stAecPreload.u32BackgroundSize, FilterR_fd);
         fclose(FilterR_fd);
         printf("----------Preload----------\n");
