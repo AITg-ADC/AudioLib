@@ -415,7 +415,6 @@ int main_AGC(void)
     stAgcInfoPre.s32SamplingRate = SAMPLING_RATE;
     AUD_AGC_PreInit(&stAgcInfoPre, &stAgcRtn);
     pInternalBuf = malloc(stAgcRtn.u32InternalBufSize);
-    printf("stAgcRtn.u32InternalBufSize= %d\n", stAgcRtn.u32InternalBufSize);
 
     AUD_AGC_Init(pInternalBuf, stAgcRtn.u32InternalBufSize);
 
