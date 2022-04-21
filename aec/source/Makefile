@@ -31,16 +31,12 @@ OPTFLAG += -D_ADD_SUB_SATURATE
 #############################################################
 DEFINE_FLAGS += -D_ARMV7_
 DEFINE_FLAGS += -DHAVE_CONFIG_H 
-DEFINE_FLAGS += -DFIXED_POINT
-DEFINE_FLAGS += -DADD_NLP
+# DEFINE_FLAGS += -DFIXED_POINT
+# DEFINE_FLAGS += -DADD_NLP
 
 #--------- ENVIRONMENT SETTING --------------------
 WARNING	= -Wall -Wundef -Wsign-compare -Wno-missing-braces -Wstrict-prototypes -Wno-sign-compare
-ifeq ($(findstring NA51089,$(PLATFORM_CFLAGS)), NA51089)
-OPTIMIZATION = -O1
-else
 OPTIMIZATION = -O2
-endif
 
 COMPILE_OPTS	= -I. $(OPTIMIZATION) -fPIC -ffunction-sections -fdata-sections -D__LINUX_USER__
 C_CFLAGS	= $(PLATFORM_CFLAGS) $(COMPILE_OPTS) $(WARNING) $(EXTRA_INCLUDE)
@@ -51,7 +47,8 @@ LD_FLAGS	= -fPIC -shared -lpthread -lm
 #--------- END OF ENVIRONMENT SETTING -------------
 SRC = \
 aec.c      buffer.c   filterbank.c  kiss_fft.c   mdf.c  powf_approach.c  smallft.c \
-aud_mem.c  fftwrap.c  jitter.c      kiss_fftr.c  ns.c   preprocess.c aud_aec_api.c aud_ns_api.c
+aud_mem.c  fftwrap.c  jitter.c      kiss_fftr.c  ns.c   preprocess.c aud_aec_api.c aud_ns_api.c \
+aud_agc_api.c  agc.c
 
 uclibc=$(shell echo $(CROSS_COMPILE)|grep uclib)
 ifeq ($(uclibc),)

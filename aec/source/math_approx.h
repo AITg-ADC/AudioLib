@@ -7,18 +7,18 @@
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
    are met:
-   
+
    - Redistributions of source code must retain the above copyright
    notice, this list of conditions and the following disclaimer.
-   
+
    - Redistributions in binary form must reproduce the above copyright
    notice, this list of conditions and the following disclaimer in the
    documentation and/or other materials provided with the distribution.
-   
+
    - Neither the name of the Xiph.org Foundation nor the names of its
    contributors may be used to endorse or promote products derived from
    this software without specific prior written permission.
-   
+
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -36,9 +36,6 @@
 #define MATH_APPROX_H
 
 #include "arch.h"
-#include "ntk_basic_operation.h"
-#include "ntk_opt_switch.h"
-
 
 #ifndef FIXED_POINT
 
@@ -63,13 +60,10 @@ static inline spx_word16_t speex_rand(spx_word16_t std, spx_int32_t *seed)
 
 #endif
 
+
 static inline spx_int16_t spx_ilog2(spx_uint32_t x)
 {
-#ifdef _MIPS_spx_ilog2_OPT
-    return(31- CLZ_32(x));
-#else
    int r=0;
-      
    if (x>=(spx_int32_t)65536)
    {
       x >>= 16;
@@ -95,7 +89,6 @@ static inline spx_int16_t spx_ilog2(spx_uint32_t x)
       r += 1;
    }
    return r;
-#endif   
 }
 
 static inline spx_int16_t spx_ilog4(spx_uint32_t x)
@@ -152,9 +145,9 @@ static inline spx_word16_t spx_sqrt(spx_word32_t x)
    spx_word32_t rt;
    k = spx_ilog4(x)-6;
    x = VSHR32(x, (k<<1));
-   rt = ADD16(C0, MULT16_16_Q14(x, ADD16(C1, MULT16_16_Q14(x, ADD16(C2, MULT16_16_Q14(EXTRACT16(x), (C3)))))));
+   rt = ADD16(C0, MULT16_16_Q14(x, ADD16(C1, MULT16_16_Q14(x, ADD16(C2, MULT16_16_Q14(x, (C3)))))));
    rt = VSHR32(rt,7-k);
-   return EXTRACT16(rt);
+   return rt;
 }
 
 /* log(x) ~= -2.18151 + 4.20592*x - 2.88938*x^2 + 0.86535*x^3 (for .5 < x < 1) */
@@ -175,11 +168,11 @@ static inline spx_word16_t spx_acos(spx_word16_t x)
       x = NEG16(x);
    }
    x = SUB16(16384,x);
-   
+
    x = x >> 1;
    sq = MULT16_16_Q13(x, ADD16(A1, MULT16_16_Q13(x, ADD16(A2, MULT16_16_Q13(x, (A3))))));
-   ret = spx_sqrt(NTK_SHL32(EXTEND32(sq),13));
-   
+   ret = spx_sqrt(SHL32(EXTEND32(sq),13));
+
    /*ret = spx_sqrt(67108864*(-1.6129e-04 + 2.0104e+00*f + 2.7373e-01*f*f + 1.8136e-01*f*f*f));*/
    if (s)
       ret = SUB16(25736,ret);
@@ -198,12 +191,12 @@ static inline spx_word16_t spx_cos(spx_word16_t x)
 
    if (x<12868)
    {
-      x2 = EXTRACT16(MULT16_16_P13(x,x));
-      return EXTRACT16(ADD32(K1, MULT16_16_P13(x2, ADD32(K2, MULT16_16_P13(x2, ADD32(K3, MULT16_16_P13(K4, x2)))))));
+      x2 = MULT16_16_P13(x,x);
+      return ADD32(K1, MULT16_16_P13(x2, ADD32(K2, MULT16_16_P13(x2, ADD32(K3, MULT16_16_P13(K4, x2))))));
    } else {
       x = SUB16(25736,x);
-      x2 = EXTRACT16(MULT16_16_P13(x,x));
-      return EXTRACT16(SUB32(-K1, MULT16_16_P13(x2, ADD32(K2, MULT16_16_P13(x2, ADD32(K3, MULT16_16_P13(K4, x2)))))));
+      x2 = MULT16_16_P13(x,x);
+      return SUB32(-K1, MULT16_16_P13(x2, ADD32(K2, MULT16_16_P13(x2, ADD32(K3, MULT16_16_P13(K4, x2))))));
    }
 }
 
@@ -215,19 +208,19 @@ static inline spx_word16_t spx_cos(spx_word16_t x)
 static inline spx_word16_t _spx_cos_pi_2(spx_word16_t x)
 {
    spx_word16_t x2;
-   
+
    x2 = MULT16_16_P15(x,x);
-   return EXTRACT16(ADD32(1, ADD32(SUB16(L1,x2), MULT16_16_P15(x2, EXTRACT16(ADD32(L2, MULT16_16_P15(x2, EXTRACT16(ADD32(L3, MULT16_16_P15(L4, x2))))))))));
+   return ADD16(1,MIN16(32766,ADD32(SUB16(L1,x2), MULT16_16_P15(x2, ADD32(L2, MULT16_16_P15(x2, ADD32(L3, MULT16_16_P15(L4, x2))))))));
 }
 
 static inline spx_word16_t spx_cos_norm(spx_word32_t x)
 {
    x = x&0x0001ffff;
-   if (x>NTK_SHL32(EXTEND32(1), 16))
-      x = SUB32(NTK_SHL32(EXTEND32(1), 17),x);
+   if (x>SHL32(EXTEND32(1), 16))
+      x = SUB32(SHL32(EXTEND32(1), 17),x);
    if (x&0x00007fff)
    {
-      if (x<NTK_SHL32(EXTEND32(1), 15))
+      if (x<SHL32(EXTEND32(1), 15))
       {
          return _spx_cos_pi_2(EXTRACT16(x));
       } else {
@@ -263,7 +256,7 @@ static inline spx_word32_t spx_exp2(spx_word16_t x)
       return 0x7fffffff;
    else if (integer < -15)
       return 0;
-   frac = NTK_SHL16(x-NTK_SHL16(integer,11),3);
+   frac = SHL16(x-SHL16(integer,11),3);
    frac = ADD16(D0, MULT16_16_Q14(frac, ADD16(D1, MULT16_16_Q14(frac, ADD16(D2 , MULT16_16_Q14(D3,frac))))));
    return VSHR32(EXTEND32(frac), -integer-2);
 }
@@ -303,7 +296,7 @@ static inline spx_word16_t spx_atan(spx_word32_t x)
       int e = spx_ilog2(x);
       if (e>=29)
          return 25736;
-      x = DIV32_16(NTK_SHL32(EXTEND32(32767),29-e), EXTRACT16(SHR32(x, e-14)));
+      x = DIV32_16(SHL32(EXTEND32(32767),29-e), EXTRACT16(SHR32(x, e-14)));
       return SUB16(25736, SHR16(spx_atan01(x),1));
    }
 }

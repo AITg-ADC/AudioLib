@@ -37,17 +37,8 @@
  *  This is the acoustic echo canceller module.
  *  @{
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "arch.h"
-#include "speex_types.h"
-#include "fftwrap.h"
+#include "speexdsp_types.h"
 #include "pseudofloat.h"
-#include "math_approx.h"
-#include "os_support.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -69,89 +60,11 @@ extern "C" {
 /** Get impulse response (int32[]) */
 #define SPEEX_ECHO_GET_IMPULSE_RESPONSE 29
 
-/* If enabled, the AEC will use a foreground filter and a background filter to be more robust to double-talk
-   and difficult signals in general. The cost is an extra FFT and a matrix-vector multiply */
-#define TWO_PATH
-
-#define PLAYBACK_DELAY 2
-
-// #define USE_THOSE_PARAMS
-
 /** Internal echo canceller state. Should never be accessed directly. */
 struct SpeexEchoState_;
 
-/** Speex echo cancellation state. */
-struct SpeexEchoState_ {
-    int frame_size;           /**< Number of samples processed each time */
-    int window_size;
-    int M;
-    int cancel_count;
-    int adapted;
-    int saturated;
-    int screwed_up;
-    int C;                    /** Number of input channels (microphones) */
-    int K;                    /** Number of output channels (loudspeakers) */
-    spx_int32_t sampling_rate;
-    spx_word16_t spec_average;
-    spx_word16_t beta0;
-    spx_word16_t beta_max;
-    spx_word32_t sum_adapt;
-    spx_word16_t leak_estimate;
-
-    spx_word16_t *e;      /* scratch */
-    spx_word16_t *x;      /* Far-end input buffer (2N) */
-    spx_word16_t *X;      /* Far-end buffer (M+1 frames) in frequency domain */
-    spx_word16_t *input;  /* scratch */
-    spx_word16_t *y;      /* scratch */
-    spx_word16_t *last_y;
-    spx_word16_t *Y;      /* scratch */
-    spx_word16_t *E;
-    spx_word32_t *PHI;    /* scratch */
-    spx_word32_t *W;      /* (Background) filter weights */
-#ifdef TWO_PATH
-    spx_word16_t *foreground; /* Foreground filter weights */
-    spx_word32_t  Davg1;  /* 1st recursive average of the residual power difference */
-    spx_word32_t  Davg2;  /* 2nd recursive average of the residual power difference */
-    spx_float_t   Dvar1;  /* Estimated variance of 1st estimator */
-    spx_float_t   Dvar2;  /* Estimated variance of 2nd estimator */
-#endif
-    spx_word32_t *power;  /* Power of the far-end signal */
-    spx_float_t  *power_1;/* Inverse power of far-end */
-    spx_word16_t *wtmp;   /* scratch */
-#ifdef FIXED_POINT
-    spx_word16_t *wtmp2;  /* scratch */
-#endif
-    spx_word32_t *Rf;     /* scratch */
-    spx_word32_t *Yf;     /* scratch */
-    spx_word32_t *Xf;     /* scratch */
-    spx_word32_t *Eh;
-    spx_word32_t *Yh;
-    spx_float_t   Pey;
-    spx_float_t   Pyy;
-    spx_word16_t *window;
-    spx_word16_t *prop;
-    void *fft_table;
-    spx_word16_t *memX, *memD, *memE;
-    spx_word16_t preemph;
-    spx_word16_t notch_radius;
-    spx_mem_t *notch_mem;
-
-#ifdef USE_THOSE_PARAMS
-    /* NOTE: If you only use speex_echo_cancel() and want to save some memory, remove this */
-    spx_int16_t *play_buf;
-    int play_buf_pos;
-    int play_buf_started;
-#endif	
-
-    int s32enable_AR_func;
-    spx_word16_t *ps16AmpRate; 
-	int s32disable_echo_smooth;
-	int s32disable_dc_filter;
-	int s32disable_leak_estimate;
-};
-
 /** @class SpeexEchoState
- * This holds the state of the echo canceller. You need one per channel. 
+ * This holds the state of the echo canceller. You need one per channel.
 */
 
 /** Internal echo canceller state. Should never be accessed directly. */
@@ -162,7 +75,7 @@ typedef struct SpeexEchoState_ SpeexEchoState;
  * @param filter_length Number of samples of echo to cancel (should generally correspond to 100-500 ms)
  * @return Newly-created echo canceller state
  */
-SpeexEchoState *speex_echo_state_init(int frame_size, int filter_length, int nb_mic, int nb_speakers, int sampling_rate, PST_AUD_AEC_PRELOAD pstAecPreload);
+SpeexEchoState *speex_echo_state_init(int frame_size, int filter_length);
 
 /** Creates a new multi-channel echo canceller state
  * @param frame_size Number of samples to process at one time (should correspond to 10-20 ms)
@@ -171,12 +84,12 @@ SpeexEchoState *speex_echo_state_init(int frame_size, int filter_length, int nb_
  * @param nb_speakers Number of speaker channels
  * @return Newly-created echo canceller state
  */
-SpeexEchoState *speex_echo_state_init_mc(int frame_size, int filter_length, int nb_mic, int nb_speakers, int sampling_rate, PST_AUD_AEC_PRELOAD pstAecPreload);
+SpeexEchoState *speex_echo_state_init_mc(int frame_size, int filter_length, int nb_mic, int nb_speakers);
 
-/** Destroys an echo canceller state 
+/** Destroys an echo canceller state
  * @param st Echo canceller state
 */
-void speex_echo_state_destroy(void *state);
+void speex_echo_state_destroy(SpeexEchoState *st);
 
 /** Performs echo cancellation a frame, based on the audio sent to the speaker (no delay is added
  * to playback in this form)
@@ -186,7 +99,7 @@ void speex_echo_state_destroy(void *state);
  * @param play Signal played to the speaker (received from far end)
  * @param out Returns near-end signal with echo removed
  */
-void speex_echo_cancellation(void *state, spx_int16_t *rec, spx_int16_t *play, spx_int16_t *out, PST_AUD_AEC_PRELOAD pstAecPreload);
+void speex_echo_cancellation(SpeexEchoState *st, const spx_int16_t *rec, const spx_int16_t *play, spx_int16_t *out);
 
 /** Performs echo cancellation a frame (deprecated) */
 void speex_echo_cancel(SpeexEchoState *st, const spx_int16_t *rec, const spx_int16_t *play, spx_int16_t *out, spx_int32_t *Yout);
@@ -205,7 +118,7 @@ void speex_echo_capture(SpeexEchoState *st, const spx_int16_t *rec, spx_int16_t 
 */
 void speex_echo_playback(SpeexEchoState *st, const spx_int16_t *play);
 
-/** Reset the echo canceller to its original state 
+/** Reset the echo canceller to its original state
  * @param st Echo canceller state
  */
 void speex_echo_state_reset(SpeexEchoState *st);
@@ -227,7 +140,7 @@ typedef struct SpeexDecorrState_ SpeexDecorrState;
 
 
 /** Create a state for the channel decorrelation algorithm
-    This is useful for multi-channel echo cancellation only 
+    This is useful for multi-channel echo cancellation only
  * @param rate Sampling rate
  * @param channels Number of channels (it's a bit pointless if you don't have at least 2)
  * @param frame_size Size of the frame to process at ones (counting samples *per* channel)
@@ -243,7 +156,7 @@ SpeexDecorrState *speex_decorrelate_new(int rate, int channels, int frame_size);
 */
 void speex_decorrelate(SpeexDecorrState *st, const spx_int16_t *in, spx_int16_t *out, int strength);
 
-/** Destroy a Decorrelation state 
+/** Destroy a Decorrelation state
  * @param st State to destroy
 */
 void speex_decorrelate_destroy(SpeexDecorrState *st);

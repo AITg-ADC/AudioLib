@@ -36,14 +36,11 @@ typedef struct _ST_AUD_AEC_PRELOAD
 typedef enum _EN_AUD_AEC_PARAMS
 {
     /*AEC*/
+    EN_AUD_AEC_SAMPLING_RATE,           //Sampling Rate
     EN_AUD_AEC_ENABLE_AR,               //Enable amplitude rate function.
     EN_AUD_AEC_AMP_RATE,                //Enlarge mic/speaker signal.   (default=1)
     EN_AUD_AEC_PREEMPH,                 //Parameter for high pass filter. The bigger of this param, the higher gain of high frequency band. (default=0.9)
-    EN_AUD_AEC_NOTCH_RADIUS,            //Parameter for DC filter. The smaller of this param, the faster of the convergency rate. (default=0.9 for 8k/ default=0.992 for 48k)
     EN_AUD_AEC_LEAK_ESTIMATE,           //Means the proportion of leaked echo. Note that the setting works only when leak estimate is enabled. (default=0.25)
-    EN_AUD_AEC_DISABLE_LEAK_ESTIMTAE,   //Disable leak estimate. (1:disable 0:enable) (default=0)
-    EN_AUD_AEC_DISABLE_DC_FILTER,       //Disable DC filter for mic signal.  (1:disable 0:enable) (default=0)
-    EN_AUD_AEC_DISABLE_ECHO_SMOOTH,     //Disable smoothing echo signal.  (1:disable 0:enable) (default=0)
     EN_AUD_AEC_ECHO_END,                
 
     /*Noise Suppression*/
@@ -52,7 +49,6 @@ typedef enum _EN_AUD_AEC_PARAMS
     EN_AUD_AEC_DENOISE,                 //Denoise enable
     EN_AUD_AEC_ECHO_SUPPRESS,           //Echo suppression level (defualt=-40)
     EN_AUD_AEC_ECHO_SUPPRESS_ACTIVE,    //Echo suppression level (defualt=-15)
-    EN_AUD_AEC_ECHO_NOISE_RATIO,        //Means the proportion of depending on the old echo infornmation. (default=0.8)
     EN_AUD_AEC_NLP_ENABLE,              //NLP enable (defualt=1)
     EN_AUD_AEC_PARAMS_TOTAL
 } EN_AUD_AEC_PARAMS;

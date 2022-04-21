@@ -1,5 +1,5 @@
 /* Copyright (C) 2007 Jean-Marc Valin
-      
+
    File: speex_buffer.h
    This is a very simple ring buffer implementation. It is not thread-safe
    so you need to do your own locking.
@@ -34,7 +34,7 @@
 #ifndef SPEEX_BUFFER_H
 #define SPEEX_BUFFER_H
 
-#include "speex_types.h"
+#include "speexdsp_types.h"
 
 #ifdef __cplusplus
 extern "C" {

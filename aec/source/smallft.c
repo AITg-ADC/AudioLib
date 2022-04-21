@@ -37,7 +37,6 @@
 #include "arch.h"
 #include "os_support.h"
 
-#ifndef FIXED_POINT
 static void drfti1(int n, float *wa, int *ifac){
   static int ntryh[4] = { 4,2,3,5 };
   static float tpi = 6.28318530717958648f;
@@ -97,10 +96,10 @@ static void drfti1(int n, float *wa, int *ifac){
       argld=(float)ld*argh;
       fi=0.f;
       for (ii=2;ii<ido;ii+=2){
-        fi+=1.f;
-        arg=fi*argld;
-        wa[i++]=cos(arg);
-        wa[i++]=sin(arg);
+	fi+=1.f;
+	arg=fi*argld;
+	wa[i++]=cos(arg);
+	wa[i++]=sin(arg);
       }
       is+=ido;
     }
@@ -128,7 +127,7 @@ static void dradf2(int ido,int l1,float *cc,float *ch,float *wa1){
     t1+=ido;
     t2+=ido;
   }
-    
+
   if(ido<2)return;
   if(ido==2)goto L105;
 
@@ -170,12 +169,12 @@ static void dradf2(int ido,int l1,float *cc,float *ch,float *wa1){
 }
 
 static void dradf4(int ido,int l1,float *cc,float *ch,float *wa1,
-        float *wa2,float *wa3){
+	    float *wa2,float *wa3){
   static float hsqt2 = .70710678118654752f;
   int i,k,t0,t1,t2,t3,t4,t5,t6;
   float ci2,ci3,ci4,cr2,cr3,cr4,ti1,ti2,ti3,ti4,tr1,tr2,tr3,tr4;
   t0=l1*ido;
-  
+
   t1=t0;
   t4=t1<<1;
   t2=t1+(t1<<1);
@@ -247,7 +246,7 @@ static void dradf4(int ido,int l1,float *cc,float *ch,float *wa1,
   if(ido&1)return;
 
  L105:
-  
+
   t2=(t1=t0+ido-1)+(t0<<1);
   t3=ido<<2;
   t4=ido;
@@ -281,7 +280,7 @@ static void dradfg(int ido,int ip,int l1,int idl1,float *cc,float *c1,
   int nbd;
   float dcp,arg,dsp,ar1h,ar2h;
   int idp2,ipp2;
-  
+
   arg=tpi/(float)ip;
   dcp=cos(arg);
   dsp=sin(arg);
@@ -639,7 +638,7 @@ static void dradb2(int ido,int l1,float *cc,float *ch,float *wa1){
   float ti2,tr2;
 
   t0=l1*ido;
-  
+
   t1=0;
   t2=0;
   t3=(ido<<1)-1;
@@ -750,12 +749,12 @@ static void dradb3(int ido,int l1,float *cc,float *ch,float *wa1,
 }
 
 static void dradb4(int ido,int l1,float *cc,float *ch,float *wa1,
-              float *wa2,float *wa3){
+			  float *wa2,float *wa3){
   static float sqrt2=1.414213562373095f;
   int i,k,t0,t1,t2,t3,t4,t5,t6,t7,t8;
   float ci2,ci3,ci4,cr2,cr3,cr4,ti1,ti2,ti3,ti4,tr1,tr2,tr3,tr4;
   t0=l1*ido;
-  
+
   t1=0;
   t2=ido<<2;
   t3=0;
@@ -764,7 +763,7 @@ static void dradb4(int ido,int l1,float *cc,float *ch,float *wa1,
     t4=t3+t6;
     t5=t1;
     tr3=cc[t4-1]+cc[t4-1];
-    tr4=cc[t4]+cc[t4]; 
+    tr4=cc[t4]+cc[t4];
     tr1=cc[t3]-cc[(t4+=t6)-1];
     tr2=cc[t3]+cc[t4-1];
     ch[t5]=tr2+tr3;
@@ -859,7 +858,7 @@ static void dradbg(int ido,int ip,int l1,int idl1,float *cc,float *c1,
   ipp2=ip;
   ipph=(ip+1)>>1;
   if(ido<l1)goto L103;
-  
+
   t1=0;
   t2=0;
   for(k=0;k<l1;k++){
@@ -1260,4 +1259,3 @@ void spx_drft_clear(struct drft_lookup *l)
       speex_free(l->splitcache);
   }
 }
-#endif

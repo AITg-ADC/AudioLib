@@ -21,12 +21,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
    typedef struct { kiss_fft_scalar r; kiss_fft_scalar i; }kiss_fft_cpx; */
 #include "kiss_fft.h"
 #include "math_approx.h"
-#include "ntk_basic_operation.h"
-#include "ntk_opt_switch.h"
-#include "fixed_generic.h"
 
 #define MAXFACTORS 32
-/* e.g. an fft of length 128 has 4 factors 
+/* e.g. an fft of length 128 has 4 factors
  as far as kissfft is concerned
  4*4*4*2
  */
@@ -50,39 +47,37 @@ struct kiss_fft_state{
 #ifdef FIXED_POINT
 #include "arch.h"
 # define FRACBITS 15
-# define SAMPPROD spx_int32_t 
+# define SAMPPROD spx_int32_t
 #define SAMP_MAX 32767
 
 #define SAMP_MIN -SAMP_MAX
-/*
+
 #if defined(CHECK_OVERFLOW)
 #  define CHECK_OVERFLOW_OP(a,op,b)  \
-    if ( (SAMPPROD)(a) op (SAMPPROD)(b) > SAMP_MAX || (SAMPPROD)(a) op (SAMPPROD)(b) < SAMP_MIN ) { \
-        fprintf(stderr,"WARNING:overflow @ " __FILE__ "(%d): (%d " #op" %d) = %ld\n",__LINE__,(a),(b),(SAMPPROD)(a) op (SAMPPROD)(b) );  }
+	if ( (SAMPPROD)(a) op (SAMPPROD)(b) > SAMP_MAX || (SAMPPROD)(a) op (SAMPPROD)(b) < SAMP_MIN ) { \
+		fprintf(stderr,"WARNING:overflow @ " __FILE__ "(%d): (%d " #op" %d) = %ld\n",__LINE__,(a),(b),(SAMPPROD)(a) op (SAMPPROD)(b) );  }
 #endif
-*/
+
 
 #   define smul(a,b) ( (SAMPPROD)(a)*(b) )
-#   define sround( x )  (EXTRACT16( ( (x) + (1<<(FRACBITS-1)) ) >> FRACBITS ))
+#   define sround( x )  (kiss_fft_scalar)( ( (x) + (1<<(FRACBITS-1)) ) >> FRACBITS )
 
 #   define S_MUL(a,b) sround( smul(a,b) )
 
-#if defined(WIN32) || defined(_ARMV7_)
 #   define C_MUL(m,a,b) \
-      do{ (m).r = sround(SUB32( smul((a).r,(b).r) , smul((a).i,(b).i) )); \
-          (m).i = sround(ADD32( smul((a).r,(b).i) , smul((a).i,(b).r) )); }while(0)
-          
+      do{ (m).r = sround( smul((a).r,(b).r) - smul((a).i,(b).i) ); \
+          (m).i = sround( smul((a).r,(b).i) + smul((a).i,(b).r) ); }while(0)
+
 #   define C_MUL4(m,a,b) \
-               do{ (m).r = PSHR32(SUB32( smul((a).r,(b).r) , smul((a).i,(b).i)),17 ); \
-               (m).i = PSHR32(ADD32( smul((a).r,(b).i) , smul((a).i,(b).r)),17 ); }while(0)
-#endif
+               do{ (m).r = PSHR32( smul((a).r,(b).r) - smul((a).i,(b).i),17 ); \
+               (m).i = PSHR32( smul((a).r,(b).i) + smul((a).i,(b).r),17 ); }while(0)
 
 #   define DIVSCALAR(x,k) \
-    (x) = sround( smul(  x, SAMP_MAX/k ) )
+	(x) = sround( smul(  x, SAMP_MAX/k ) )
 
 #   define C_FIXDIV(c,div) \
-    do {    DIVSCALAR( (c).r , div);  \
-        DIVSCALAR( (c).i  , div); }while (0)
+	do {    DIVSCALAR( (c).r , div);  \
+		DIVSCALAR( (c).i  , div); }while (0)
 
 #   define C_MULBYSCALAR( c, s ) \
     do{ (c).r =  sround( smul( (c).r , s ) ) ;\
@@ -107,57 +102,30 @@ struct kiss_fft_state{
 #  define CHECK_OVERFLOW_OP(a,op,b) /* noop */
 #endif
 
-#ifdef _MIPS_
-#define  C_ADD(m,a,b)\
-{   \
-    register int *result = (int *)&(m); \
-    register int *x = (int *)&(a);       \
-    register int *y = (int *)&(b);  \
-       asm volatile ("ADDQ_S.PH %[res], %[x], %[y]" : [res] "=&r" (*result) : [x] "r" (*x), [y] "r" (*y)); \
-}
-    
-#define C_SUB(m,a,b) \
-{   \
-    register int *result = (int *)&(m); \
-    register int *x = (int *)&(a);       \
-    register int *y = (int *)&(b);  \
-       asm volatile ("SUBQ_S.PH %[res], %[x], %[y]" : [res] "=&r" (*result) : [x] "r" (*x), [y] "r" (*y)); \
-}
- 
-#define C_ADDTO(m,a)    \
-{   \
-    register int *result = (int *)&(m); \
-    register int *x = (int *)&(a);       \
-       asm volatile ("ADDQ_S.PH %[res], %[x], %[y]" : [res] "=&r" (*result) : [x] "r" (*result), [y] "r" (*x)); \
-}
-#else // if _MIPS_
-
 #define  C_ADD( res, a,b)\
     do { \
-        CHECK_OVERFLOW_OP((a).r,+,(b).r)\
-        CHECK_OVERFLOW_OP((a).i,+,(b).i)\
-        (res).r = ADD16((a).r,(b).r);  (res).i = ADD16((a).i,(b).i); \
+	    CHECK_OVERFLOW_OP((a).r,+,(b).r)\
+	    CHECK_OVERFLOW_OP((a).i,+,(b).i)\
+	    (res).r=(a).r+(b).r;  (res).i=(a).i+(b).i; \
     }while(0)
 #define  C_SUB( res, a,b)\
     do { \
-        CHECK_OVERFLOW_OP((a).r,-,(b).r)\
-        CHECK_OVERFLOW_OP((a).i,-,(b).i)\
-        (res).r = SUB16((a).r,(b).r);  (res).i = SUB16((a).i,(b).i); \
+	    CHECK_OVERFLOW_OP((a).r,-,(b).r)\
+	    CHECK_OVERFLOW_OP((a).i,-,(b).i)\
+	    (res).r=(a).r-(b).r;  (res).i=(a).i-(b).i; \
     }while(0)
 #define C_ADDTO( res , a)\
     do { \
-        CHECK_OVERFLOW_OP((res).r,+,(a).r)\
-        CHECK_OVERFLOW_OP((res).i,+,(a).i)\
-        (res).r = ADD16((res).r ,(a).r);  (res).i = ADD16((res).i, (a).i);\
+	    CHECK_OVERFLOW_OP((res).r,+,(a).r)\
+	    CHECK_OVERFLOW_OP((res).i,+,(a).i)\
+	    (res).r += (a).r;  (res).i += (a).i;\
     }while(0)
-
-#endif // if _MIPS_
 
 #define C_SUBFROM( res , a)\
     do {\
-        CHECK_OVERFLOW_OP((res).r,-,(a).r)\
-        CHECK_OVERFLOW_OP((res).i,-,(a).i)\
-        (res).r -= (a).r;  (res).i -= (a).i; \
+	    CHECK_OVERFLOW_OP((res).r,-,(a).r)\
+	    CHECK_OVERFLOW_OP((res).i,-,(a).i)\
+	    (res).r -= (a).r;  (res).i -= (a).i; \
     }while(0)
 
 
@@ -176,13 +144,17 @@ struct kiss_fft_state{
 #endif
 
 #define  kf_cexp(x,phase) \
-    do{ \
-        (x)->r = KISS_FFT_COS(phase);\
-        (x)->i = KISS_FFT_SIN(phase);\
-    }while(0)
+	do{ \
+		(x)->r = KISS_FFT_COS(phase);\
+		(x)->i = KISS_FFT_SIN(phase);\
+	}while(0)
 #define  kf_cexp2(x,phase) \
                do{ \
                (x)->r = spx_cos_norm((phase));\
                (x)->i = spx_cos_norm((phase)-32768);\
 }while(0)
 
+
+/* a debugging function */
+#define pcpx(c)\
+    fprintf(stderr,"%g + %gi\n",(double)((c)->r),(double)((c)->i) )

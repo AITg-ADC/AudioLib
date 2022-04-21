@@ -3,7 +3,7 @@
    @file pseudofloat.h
    @brief Pseudo-floating point
  * This header file provides a lightweight floating point type for
- * use on fixed-point platforms when a large dynamic range is 
+ * use on fixed-point platforms when a large dynamic range is
  * required. The new type is not compatible with the 32-bit IEEE format,
  * it is not even remotely as accurate as 32-bit floats, and is not
  * even guaranteed to produce even remotely correct results for code
@@ -16,18 +16,18 @@
    Redistribution and use in source and binary forms, with or without
    modification, are permitted provided that the following conditions
    are met:
-   
+
    - Redistributions of source code must retain the above copyright
    notice, this list of conditions and the following disclaimer.
-   
+
    - Redistributions in binary form must reproduce the above copyright
    notice, this list of conditions and the following disclaimer in the
    documentation and/or other materials provided with the distribution.
-   
+
    - Neither the name of the Xiph.org Foundation nor the names of its
    contributors may be used to endorse or promote products derived from
    this software without specific prior written permission.
-   
+
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
    LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -63,26 +63,6 @@ static const spx_float_t FLOAT_HALF = {16384,-15};
 #define MIN(a,b) ((a)<(b)?(a):(b))
 static inline spx_float_t PSEUDOFLOAT(spx_int32_t x)
 {
-#ifdef _MIPS_PSEUDOFLOAT_OPT_NOT_Exactly
-    spx_float_t r1;
-
-    if (x == 0)
-    {
-      r1.m = 0;
-      r1.e = 0;
-    }
-    else
-    {
-        int e;
-        e = spx_ilog2(ABS32(x))-14;
-        r1.m = VSHR32(x, e);
-        r1.e = e;
-
-    }
-    return r1;
-   
-#else
-{
    int e=0;
    int sign=0;
    if (x<0)
@@ -90,16 +70,13 @@ static inline spx_float_t PSEUDOFLOAT(spx_int32_t x)
       sign = 1;
       x = -x;
    }
-   
    if (x==0)
    {
       spx_float_t r = {0,0};
       return r;
    }
-   
    e = spx_ilog2(ABS32(x))-14;
    x = VSHR32(x, e);
-   
    if (sign)
    {
       spx_float_t r;
@@ -107,15 +84,13 @@ static inline spx_float_t PSEUDOFLOAT(spx_int32_t x)
       r.e = e;
       return r;
    }
-   else      
+   else
    {
       spx_float_t r;
       r.m = x;
       r.e = e;
       return r;
    }
-}
-#endif   
 }
 
 
@@ -126,24 +101,16 @@ static inline spx_float_t FLOAT_ADD(spx_float_t a, spx_float_t b)
       return b;
    else if (b.m==0)
       return a;
-   if ((a).e > (b).e) 
+   if ((a).e > (b).e)
    {
       r.m = ((a).m>>1) + ((b).m>>MIN(15,(a).e-(b).e+1));
       r.e = (a).e+1;
    }
-   else 
+   else
    {
       r.m = ((b).m>>1) + ((a).m>>MIN(15,(b).e-(a).e+1));
       r.e = (b).e+1;
    }
-
-#ifdef _MIPS_FLOAT_OPERATOR_OPT_NOT_Exactly   
-    if(ABS16(r.m) < 16384)
-    {
-        r.m<<=1;
-        r.e-=1;
-    }
-#else
    if (r.m>0)
    {
       if (r.m<16384)
@@ -158,7 +125,6 @@ static inline spx_float_t FLOAT_ADD(spx_float_t a, spx_float_t b)
          r.e-=1;
       }
    }
-#endif      
    /*printf ("%f + %f = %f\n", REALFLOAT(a), REALFLOAT(b), REALFLOAT(r));*/
    return r;
 }
@@ -175,18 +141,11 @@ static inline spx_float_t FLOAT_SUB(spx_float_t a, spx_float_t b)
       r.m = ((a).m>>1) - ((b).m>>MIN(15,(a).e-(b).e+1));
       r.e = (a).e+1;
    }
-   else 
+   else
    {
       r.m = ((a).m>>MIN(15,(b).e-(a).e+1)) - ((b).m>>1);
       r.e = (b).e+1;
    }
-#ifdef _MIPS_FLOAT_OPERATOR_OPT_NOT_Exactly   
-    if(ABS16(r.m) < 16384)
-    {
-        r.m<<=1;
-        r.e-=1;
-    }
-#else
    if (r.m>0)
    {
       if (r.m<16384)
@@ -201,7 +160,6 @@ static inline spx_float_t FLOAT_SUB(spx_float_t a, spx_float_t b)
          r.e-=1;
       }
    }
-#endif   
    /*printf ("%f + %f = %f\n", REALFLOAT(a), REALFLOAT(b), REALFLOAT(r));*/
    return r;
 }
@@ -211,10 +169,10 @@ static inline int FLOAT_LT(spx_float_t a, spx_float_t b)
    if (a.m==0)
       return b.m>0;
    else if (b.m==0)
-      return a.m<0;   
+      return a.m<0;
    if ((a).e > (b).e)
       return ((a).m>>1) < ((b).m>>MIN(15,(a).e-(b).e+1));
-   else 
+   else
       return ((b).m>>1) > ((a).m>>MIN(15,(b).e-(a).e+1));
 
 }
@@ -227,20 +185,8 @@ static inline int FLOAT_GT(spx_float_t a, spx_float_t b)
 static inline spx_float_t FLOAT_MULT(spx_float_t a, spx_float_t b)
 {
    spx_float_t r;
-   
-#ifdef _MIPS_FLOAT_MULT_NOT_Exactly
-   r.m = MULT16_16_P15(a.m, b.m);
-#else   
-   r.m = (spx_int16_t)MULT16_16_Q15((a).m, (b).m);
-#endif
+   r.m = (spx_int16_t)((spx_int32_t)(a).m*(b).m>>15);
    r.e = (a).e+(b).e+15;
-#ifdef _MIPS_FLOAT_OPERATOR_OPT_NOT_Exactly   
-    if(ABS16(r.m) < 16384)
-    {
-        r.m<<=1;
-        r.e-=1;
-    }
-#else
    if (r.m>0)
    {
       if (r.m<16384)
@@ -255,23 +201,16 @@ static inline spx_float_t FLOAT_MULT(spx_float_t a, spx_float_t b)
          r.e-=1;
       }
    }
-#endif   
    /*printf ("%f * %f = %f\n", REALFLOAT(a), REALFLOAT(b), REALFLOAT(r));*/
-   return r;   
+   return r;
 }
 
 static inline spx_float_t FLOAT_AMULT(spx_float_t a, spx_float_t b)
 {
    spx_float_t r;
-   
-#ifdef _MIPS_FLOAT_AMULT_NOT_Exactly
-   r.m = MULT16_16_P15(a.m, b.m);
-#else
-
-   r.m = (spx_int16_t)MULT16_16_Q15((a).m, (b).m);
-#endif
+   r.m = (spx_int16_t)((spx_int32_t)(a).m*(b).m>>15);
    r.e = (a).e+(b).e+15;
-   return r;   
+   return r;
 }
 
 
@@ -283,19 +222,10 @@ static inline spx_float_t FLOAT_SHL(spx_float_t a, int b)
    return r;
 }
 
-static inline int FLOAT_SHL_INT(spx_float_t a, int b)
-{
-   spx_float_t r;
-   int *ps32rtn = (int *)&r;
-   r.m = a.m;
-   r.e = a.e+b;
-   return(*ps32rtn);
-}
-
 static inline spx_int16_t FLOAT_EXTRACT16(spx_float_t a)
 {
    if (a.e<0)
-      return ADD32(EXTEND32(a.m), (EXTEND32(1)<<(-a.e-1)))>>-a.e;
+      return EXTRACT16((EXTEND32(a.m)+(EXTEND32(1)<<(-a.e-1)))>>-a.e);
    else
       return a.m<<a.e;
 }
@@ -310,13 +240,7 @@ static inline spx_int32_t FLOAT_EXTRACT32(spx_float_t a)
 
 static inline spx_int32_t FLOAT_MUL32(spx_float_t a, spx_word32_t b)
 {
-#ifdef _MIPS_FLOAT_MUL32_OPT_NOT_Exactly
-   MULT_AC0(a.m, b);
-   SHILOV(-a.e);
-   return MFLO_AC0();
-#else   
-   return VSHR32(NTK_MULT16_32_Q15(a.m, b),-a.e-15);
-#endif
+   return VSHR32(MULT16_32_Q15(a.m, b),-a.e-15);
 }
 
 static inline spx_float_t FLOAT_MUL32U(spx_word32_t a, spx_word32_t b)
@@ -336,25 +260,6 @@ static inline spx_float_t FLOAT_MUL32U(spx_word32_t a, spx_word32_t b)
    return r;
 }
 
-static inline int FLOAT_MUL32U_INT(spx_word32_t a, spx_word32_t b)
-{
-   int e1, e2;
-   spx_float_t r;
-   int *ps32rtn = (int *)&r;
-   if (a==0 || b==0)
-   {
-      return 0;
-//      return FLOAT_ZERO;
-   }
-   e1 = spx_ilog2(ABS32(a));
-   a = VSHR32(a, e1-14);
-   e2 = spx_ilog2(ABS32(b));
-   b = VSHR32(b, e2-14);
-   r.m = MULT16_16_Q15(a,b);
-   r.e = e1+e2-13;
-   return(*ps32rtn);
-}
-
 /* Do NOT attempt to divide by a negative number */
 static inline spx_float_t FLOAT_DIV32_FLOAT(spx_word32_t a, spx_float_t b)
 {
@@ -366,7 +271,7 @@ static inline spx_float_t FLOAT_DIV32_FLOAT(spx_word32_t a, spx_float_t b)
    }
    e = spx_ilog2(ABS32(a))-spx_ilog2(b.m-1)-15;
    a = VSHR32(a, e);
-   if (ABS32(a)>=NTK_SHL32(EXTEND32(b.m-1),15))
+   if (ABS32(a)>=SHL32(EXTEND32(b.m-1),15))
    {
       a >>= 1;
       e++;
@@ -374,27 +279,6 @@ static inline spx_float_t FLOAT_DIV32_FLOAT(spx_word32_t a, spx_float_t b)
    r.m = DIV32_16(a,b.m);
    r.e = e-b.e;
    return r;
-}
-
-static inline int FLOAT_DIV32_FLOAT_INT(spx_word32_t a, spx_float_t b)
-{
-   int e=0;
-   spx_float_t r;
-   int *ps32rtn = (int *)&r;
-   if (a==0)
-   {
-      return 0;
-   }
-   e = spx_ilog2(ABS32(a))-spx_ilog2(b.m-1)-15;
-   a = VSHR32(a, e);
-   if (ABS32(a)>=NTK_SHL32(EXTEND32(b.m-1),15))
-   {
-      a >>= 1;
-      e++;
-   }
-   r.m = DIV32_16(a,b.m);
-   r.e = e-b.e;
-   return(*ps32rtn);
 }
 
 
@@ -415,7 +299,7 @@ static inline spx_float_t FLOAT_DIV32(spx_word32_t a, spx_word32_t b)
    }
    e = spx_ilog2(ABS32(a))-spx_ilog2(b-1)-15;
    a = VSHR32(a, e);
-   if (ABS32(a)>=NTK_SHL32(EXTEND32(b-1),15))
+   if (ABS32(a)>=SHL32(EXTEND32(b-1),15))
    {
       a >>= 1;
       e++;
@@ -425,35 +309,6 @@ static inline spx_float_t FLOAT_DIV32(spx_word32_t a, spx_word32_t b)
    r.e = e;
    return r;
 }
-
-static inline int FLOAT_DIV32_INT(spx_word32_t a, spx_word32_t b)
-{
-   int e0=0,e=0;
-   spx_float_t r;
-   int *ps32rtn = (int *)&r;
-   if (a==0)
-   {
-      return 0;
-   }
-   if (b>32767)
-   {
-      e0 = spx_ilog2(b)-14;
-      b = EXTRACT16(VSHR32(b, e0));
-      e0 = -e0;
-   }
-   e = spx_ilog2(ABS32(a))-spx_ilog2(b-1)-15;
-   a = VSHR32(a, e);
-   if (ABS32(a)>=NTK_SHL32(EXTEND32(b-1),15))
-   {
-      a >>= 1;
-      e++;
-   }
-   e += e0;
-   r.m = DIV32_16(a,b);
-   r.e = e;
-   return(*ps32rtn);
-}
-
 
 /* Do NOT attempt to divide by a negative number */
 static inline spx_float_t FLOAT_DIVU(spx_float_t a, spx_float_t b)
@@ -468,27 +323,11 @@ static inline spx_float_t FLOAT_DIVU(spx_float_t a, spx_float_t b)
    }
    num = a.m;
    a.m = ABS16(a.m);
-#ifdef _MIPS_
-   if(a.m >= b.m)
-    {
-        int c1, c2;
-        c1 = CLZ_32(a.m);
-        c2 = CLZ_32(b.m);
-        e = c2-c1;
-        a.m>>=e;
-        if(a.m>=b.m)
-        {
-            e++;
-            a.m>>=1;
-        }
-    }        
-#else
    while (a.m >= b.m)
    {
       e++;
       a.m >>= 1;
    }
-#endif   
    num = num << (15-e);
    r.m = DIV32_16(num,b.m);
    r.e = a.e-b.e-15+e;
@@ -499,7 +338,7 @@ static inline spx_float_t FLOAT_SQRT(spx_float_t a)
 {
    spx_float_t r;
    spx_int32_t m;
-   m = NTK_SHL32(EXTEND32(a.m), 14);
+   m = SHL32(EXTEND32(a.m), 14);
    r.e = a.e - 14;
    if (r.e & 1)
    {
