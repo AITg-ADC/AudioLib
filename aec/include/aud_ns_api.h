@@ -30,6 +30,7 @@ typedef enum _EN_AUD_NS_ERR {
 
 void AUD_NS_PreInit(PST_AUD_NS_INFO pstNsInfo, PST_AUD_NS_RTN pstNsRtn);
 int AUD_NS_Init(void *pInternalBuf, int u32BufSize);
+int AUD_NS_Uninit(void);
 void AUD_NS_Run(short *ps16InBuf, short *ps16OutBuf);
 int AUD_NS_SetParam(EN_AUD_NS_PARAMS enParamsCMD, void *pParamsValue);
 // int AUD_NS_GetVersion(void);

@@ -15,6 +15,7 @@
 #endif
 
 #include "ns.h"
+#include "speex_preprocess.h"
 //#include "perf.h"
 
 // Release NS Version
@@ -29,6 +30,7 @@ extern u32 _Ns_GetInternalBufSize(PST_AUD_NS_INFO pstNsInfo, u32 u32NumPreProc);
 extern u32 _Ns_SetPreProcParams(void **ppstPreProcState, EN_AUD_NS_PARAMS enParamsCMD, void *pParamsValue, s32 s32ChannelNum);
 
 extern void AUD_Malloc_Init(void *ptr, u32 u32TotalLen);
+extern int AUD_Malloc_Uninit(void);
 extern void *(*AUD_calloc)(s32 s32num, s32 s32size);
 
 /*-----------------------------------------------------------------------------*/
@@ -105,11 +107,8 @@ void _AUD_NS_Run(short *ps16InBuf, short *ps16OutBuf)
     s32 i;
 
     for (i = 0; i < s32NumCH; i++)
-#ifndef ADD_NLP
-        speex_preprocess_run(_ppstPreProcState[i], ps16InBuf, s32NumCH, i);
-#else
-        speex_preprocess_run(_ppstPreProcState[i], 0, 0, ps16InBuf, s32NumCH, i);
-#endif
+        speex_preprocess_run(_ppstPreProcState[i], ps16InBuf);
+
     if (((uintptr_t)ps16InBuf) != ((uintptr_t)ps16OutBuf))
         memcpy(ps16OutBuf, ps16InBuf, s32NumCH * _stNsInfo.s32FrameSize * sizeof(short));
 }
@@ -128,6 +127,11 @@ EN_AUD_NS_ERR _AUD_NS_SetParam(EN_AUD_NS_PARAMS enParamsCMD, void *pParamsValue)
     if (ret != 0)
         return EN_AUD_NS_EINVALCMD;
     return EN_AUD_NS_ENOERR;
+}
+
+EN_AUD_NS_ERR _AUD_NS_Uninit(void)
+{
+    return AUD_Malloc_Uninit();
 }
 
 /*-------------------------------------------------------------------------------

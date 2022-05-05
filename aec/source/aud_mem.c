@@ -104,3 +104,15 @@ void AUD_Malloc_Init(void *ptr, u32 u32TotalLen)
     AUD_calloc  = _AUD_Calloc;
     AUD_free    = _AUD_Free;
 }
+//--------------------------------------------------------------------------------------
+int AUD_Malloc_Uninit(void)
+{
+    PST_AUD_MEMORY_ALLOC pstMemAlloc = &_astMemAlloc[0];
+    if (pstMemAlloc->pu8StartAddress) {
+        free(pstMemAlloc->pu8StartAddress);
+        pstMemAlloc->pu8StartAddress = NULL;
+        pstMemAlloc->u32TotalLen     = 0;
+        return TRUE;
+    }
+    return FALSE;
+}

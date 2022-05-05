@@ -1195,9 +1195,10 @@ EXPORT int speex_echo_ctl(SpeexEchoState *st, int request, void *ptr)
 
 u32 _Aec_SetEchoParams(void *pstEchoState, EN_AUD_AEC_PARAMS enParamsCMD, void *pParamsValue)
 {
+#if 0
     SpeexEchoState *pstEchoSt = (SpeexEchoState *)pstEchoState;
-    s32 i;
     s32 s32value = *((s32 *)pParamsValue);
+    s32 i;
     s16 s16value = (s16)s32value;
 
     switch (enParamsCMD) {
@@ -1205,4 +1206,7 @@ u32 _Aec_SetEchoParams(void *pstEchoState, EN_AUD_AEC_PARAMS enParamsCMD, void *
             return 1;
     }
     return 0;
+#else
+    return 0;
+#endif
 }

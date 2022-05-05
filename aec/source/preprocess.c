@@ -1245,7 +1245,7 @@ u32 _Aec_SetPreProcParams(void **ppstPreProcState, EN_AUD_AEC_PARAMS enParamsCMD
 
     s32 i;
     s32 s32value = *((s32 *)pParamsValue);
-    s16 s16value = (s16)s32value;
+    // s16 s16value = (s16)s32value;
 
     if (!pstEchoSt)
         return 0;

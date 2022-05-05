@@ -35,5 +35,6 @@ void AUD_AGC_PreInit(PST_AUD_AGC_INFO pstNsInfo, PST_AUD_AGC_RTN pstNsRtn);
 int AUD_AGC_Init(void *pInternalBuf, int u32BufSize);
 void AUD_AGC_Run(short *ps16InBuf, short *ps16OutBuf);
 int AUD_AGC_SetParam(EN_AUD_AGC_PARAMS enParamsCMD, void *pParamsValue);
+int AUD_AGC_Uninit(void);
 
 #endif  //#ifndef _AUD_AGC_API_H_

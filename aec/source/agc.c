@@ -25,6 +25,7 @@ extern u32 _Agc_GetInternalBufSize(PST_AUD_AGC_INFO pstAgcInfo, u32 u32NumPrePro
 extern u32 _Agc_SetPreProcParams(void **ppstPreProcState, EN_AUD_AGC_PARAMS enParamsCMD, void *pParamsValue, s32 s32ChannelNum);
 
 extern void AUD_Malloc_Init(void *ptr, u32 u32TotalLen);
+extern int AUD_Malloc_Uninit(void);
 extern void *(*AUD_calloc)(s32 s32num, s32 s32size);
 
 /*-----------------------------------------------------------------------------*/
@@ -121,6 +122,15 @@ EN_AUD_AGC_ERR _AUD_AGC_SetParam(EN_AUD_AGC_PARAMS enParamsCMD, void *pParamsVal
     if (ret != 0)
         return EN_AUD_AGC_EINVALCMD;
     return EN_AUD_AGC_ENOERR;
+}
+
+/*-------------------------------------------------------------------------------
+** Input    : 
+** Output   : EN_AUD_AGC_ERR
+**--------------------------------------------------------------------------------*/
+EN_AUD_AGC_ERR _AUD_AGC_Uninit(void)
+{
+    return AUD_Malloc_Uninit();
 }
 
 /*-------------------------------------------------------------------------------

@@ -250,7 +250,7 @@ int main_AEC(void)
     fclose(echo_fd);
     fclose(ref_fd);
     fclose(FilterW_fd);
-
+    AUD_AEC_Uninit();
     return 0;
 }
 
@@ -364,7 +364,7 @@ int main_NS(int useDenoise)
 
     fclose(in_fd);
     fclose(out_fd);
-
+    AUD_NS_Uninit();
     return 0;
 }
 
@@ -478,6 +478,7 @@ int main_AGC(void)
 
     fclose(in_fd);
     fclose(out_fd);
+    AUD_AGC_Uninit();
     return 0;
 }
 

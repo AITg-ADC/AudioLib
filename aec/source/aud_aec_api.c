@@ -20,6 +20,7 @@
 #define FALSE 0
 
 EN_AUD_AEC_ERR _AUD_AEC_Init(void *pInternalBuf, int u32BufSize, PST_AUD_AEC_PRELOAD pstAecPreload);
+EN_AUD_AEC_ERR _AUD_AEC_Uninit(void);
 void _AUD_AEC_Run(short *ps16MicBuf, short *ps16SpeakerBuf, short *ps16OutBuf, short s16DisNoiseSuppr, PST_AUD_AEC_PRELOAD pstAecPreload);
 EN_AUD_AEC_ERR _AUD_AEC_SetParam(EN_AUD_AEC_PARAMS enParamsCMD, void *pParamsValue);
 
@@ -28,7 +29,7 @@ EN_AUD_AEC_ERR _AUD_AEC_SetParam(EN_AUD_AEC_PARAMS enParamsCMD, void *pParamsVal
 /*-----------------------------------------------------------------------------*/
 
 /*-------------------------------------------------------------------------------
-** Input        : pInternalBuf, u32BufSize
+** Input    : pInternalBuf, u32BufSize
 ** Output   : err
 **--------------------------------------------------------------------------------*/
 int AUD_AEC_Init(void *pInternalBuf, int u32BufSize, PST_AUD_AEC_PRELOAD pstAecPreload)
@@ -43,7 +44,7 @@ int AUD_AEC_Init(void *pInternalBuf, int u32BufSize, PST_AUD_AEC_PRELOAD pstAecP
 }
 
 /*-------------------------------------------------------------------------------
-** Input        : pu16MicBuf, pu16EchoBuf
+** Input    : pu16MicBuf, pu16EchoBuf
 ** Output   : pu16OutBuf
 **--------------------------------------------------------------------------------*/
 void AUD_AEC_Run(short *ps16MicBuf, short *ps16SpeakerBuf, short *ps16OutBuf, short s16DisNoiseSuppr, PST_AUD_AEC_PRELOAD pstAecPreload)
@@ -52,7 +53,7 @@ void AUD_AEC_Run(short *ps16MicBuf, short *ps16SpeakerBuf, short *ps16OutBuf, sh
 }
 
 /*-------------------------------------------------------------------------------
-** Input        : enParamsCMD,  u32ParamsValue
+** Input    : enParamsCMD,  u32ParamsValue
 ** Output   : err
 **--------------------------------------------------------------------------------*/
 int AUD_AEC_SetParam(EN_AUD_AEC_PARAMS enParamsCMD, void *pParamsValue)
@@ -63,4 +64,12 @@ int AUD_AEC_SetParam(EN_AUD_AEC_PARAMS enParamsCMD, void *pParamsValue)
         return FALSE;
     else
         return TRUE;
+}
+
+/*-------------------------------------------------------------------------------
+** Output   : err
+**--------------------------------------------------------------------------------*/
+int AUD_AEC_Uninit(void)
+{
+    return _AUD_AEC_Uninit();
 }

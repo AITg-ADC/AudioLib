@@ -31,6 +31,7 @@ extern u32 _Aec_SetEchoParams(void *pstEchoState, EN_AUD_AEC_PARAMS enParamsCMD,
 extern u32 _Aec_SetPreProcParams(void **ppstPreProcState, EN_AUD_AEC_PARAMS enParamsCMD, void *pParamsValue);
 
 extern void AUD_Malloc_Init(void *ptr, u32 u32TotalLen);
+extern int AUD_Malloc_Uninit(void);
 extern void *(*AUD_calloc)(s32 s32num, s32 s32size);
 
 /*-----------------------------------------------------------------------------*/
@@ -185,7 +186,7 @@ void _AUD_AEC_Run(short *ps16MicBuf, short *ps16SpeakerBuf, short *ps16OutBuf, s
 }
 
 /*-------------------------------------------------------------------------------
-** Input        : enParamsCMD,  u32ParamsValue
+** Input    : enParamsCMD,  u32ParamsValue
 ** Output   : EN_AUD_AEC_ERR
 **--------------------------------------------------------------------------------*/
 EN_AUD_AEC_ERR _AUD_AEC_SetParam(EN_AUD_AEC_PARAMS enParamsCMD, void *pParamsValue)
@@ -211,10 +212,19 @@ EN_AUD_AEC_ERR _AUD_AEC_SetParam(EN_AUD_AEC_PARAMS enParamsCMD, void *pParamsVal
 }
 
 /*-------------------------------------------------------------------------------
-** Input        :
+** Input    :
 ** Output   : version
 **--------------------------------------------------------------------------------*/
 int AUD_AEC_GetVersion(void)
 {
     return AEC_CODE_VERSION;
+}
+
+/*-------------------------------------------------------------------------------
+** Input    :
+** Output   : version
+**--------------------------------------------------------------------------------*/
+EN_AUD_AEC_ERR _AUD_AEC_Uninit(void)
+{
+    return AUD_Malloc_Uninit();
 }

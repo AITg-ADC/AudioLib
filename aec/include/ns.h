@@ -5,6 +5,7 @@
 #include "comdef_nvt.h" 
 
 EN_AUD_NS_ERR _AUD_NS_Init(void *pInternalBuf, int u32BufSize);
+EN_AUD_NS_ERR _AUD_NS_Uninit(void);
 void _AUD_NS_Run(short *ps16InBuf, short *ps16OutBuf);
 EN_AUD_NS_ERR _AUD_NS_SetParam(EN_AUD_NS_PARAMS enParamsCMD, void *pParamsValue);
 

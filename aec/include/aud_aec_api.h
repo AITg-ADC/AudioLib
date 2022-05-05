@@ -67,5 +67,6 @@ int AUD_AEC_Init(void *pInternalBuf, int u32BufSize, PST_AUD_AEC_PRELOAD pstAecP
 void AUD_AEC_Run(short *ps16MicBuf, short *ps16SpeakerBuf, short *ps16OutBuf, short s16DisNoiseSuppr, PST_AUD_AEC_PRELOAD pstAecPreload);
 int AUD_AEC_SetParam(EN_AUD_AEC_PARAMS enParamsCMD, void *pParamsValue);
 int AUD_AEC_GetVersion(void);
+int AUD_AEC_Uninit(void);
 
 #endif //#ifndef _AUD_AEC_API_H_
