@@ -1,0 +1,47 @@
+MODULE_NAME = faad2
+# DIRs
+OUTPUT_DIR = $(LIBRARY_DIR)/output
+# INCs
+LIB_INC_PATH = $(LIBRARY_DIR)/include/faad2
+# INC FLAGs
+EXTRA_INCLUDE += -I$(LIB_INC_PATH)
+
+INSTALL_DIR := $(shell pwd)/output
+
+.PHONY: all clean
+
+FAAD2 := faad2-2_10_0
+
+check_exist = if [ ! -e ./.finish ]; \
+              then rm -rf $(1); \
+              curl -s -L -o faad2-2_10_0.tar.gz https://github.com/knik0/faad2/archive/refs/tags/2_10_0.tar.gz; \
+              tar -zxf $(1).tar.gz; \
+              fi
+
+all: init
+	@echo Creating library $(MODULE_NAME) ...
+	@if [ ! -f ./.finish ]; then \
+	$(call check_exist, ${FAAD2}); \
+	cd ${FAAD2}; ./bootstrap; ./configure --prefix=${INSTALL_DIR} CC=${CC} CXX=${CXX} AR=${AR} --host=${NVT_HOST} --target=${NVT_HOST}; make -j$(MULTI_CORES); \
+	cd -; \
+	fi
+	@cd ${FAAD2}; make install; cd -;
+	@touch ./.finish
+
+clean:
+	@make -C ${FAAD2} clean
+	@rm -rf $(OUTPUT_DIR) $(INSTALL_DIR)
+
+install:
+	@mkdir -p $(OUTPUT_DIR)
+	@mkdir -p $(LIB_INC_PATH)
+	@cp -avf $(INSTALL_DIR)/lib/*.so* $(INSTALL_DIR)/lib/*.a $(OUTPUT_DIR)
+	@cp -avf $(INSTALL_DIR)/include/* $(LIB_INC_PATH)
+
+init:
+	@if [ ! -e "${INSTALL_DIR}" ]; then \
+		mkdir -p ${INSTALL_DIR}; \
+	fi
+	@if [ -z "${CROSS_COMPILE}" ]; then \
+		echo "Please execute \"source build/envsetup.sh\" firstly.  Stop."; exit 1; \
+	fi
